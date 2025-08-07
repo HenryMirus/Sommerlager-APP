@@ -1,5 +1,73 @@
-<!-- 
-Erstellung/Entfernung neuer Kinder und Betreuer.
-Hinzufügen von Dokumenten zu den Personen 
-    (bspw. Impfausweis, Essgewohnheiten, Einverständniserklärungen etc.).
--->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Benutzerverwaltung</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    form, ul { margin-top: 1rem; }
+    input, select, button { margin: 0.5rem 0; display: block; }
+    li { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Benutzer erstellen</h1>
+  <form id="userForm">
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Passwort" required />
+    <select id="role">
+      <option value="kind">Kind</option>
+      <option value="betreuer">Betreuer</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button type="submit">Erstellen</button>
+  </form>
+
+  <h2>Alle Benutzer</h2>
+  <button onclick="fetchUsers()">Neu laden</button>
+  <ul id="userList"></ul>
+
+  <script>
+    const form = document.getElementById("userForm");
+    const userList = document.getElementById("userList");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+
+      const response = await fetch("/user/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, password, role }),
+      });
+
+      if (response.ok) {
+        alert("Benutzer erstellt!");
+        form.reset();
+        fetchUsers();
+      } else {
+        const err = await response.json();
+        alert("Fehler: " + err.detail);
+      }
+    });
+
+    async function fetchUsers() {
+      const res = await fetch("/user/");
+      const users = await res.json();
+      userList.innerHTML = "";
+      users.forEach((u) => {
+        const li = document.createElement("li");
+        li.textContent = `${u.name} (${u.username}) - Rolle: ${u.role}`;
+        userList.appendChild(li);
+      });
+    }
+
+    // Beim Start einmal laden
+    fetchUsers();
+  </script>
+</body>
+</html>

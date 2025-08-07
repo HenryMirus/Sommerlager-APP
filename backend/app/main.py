@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # Import deiner Router
-from routes import (
+from backend.app.routes import (
     auth_routes,
     user_routes,
     sommerlager_routes,
@@ -33,10 +33,14 @@ templates = Jinja2Templates(directory="frontend/templates")
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/user", response_class=HTMLResponse)
+async def read_user(request: Request):
+    return templates.TemplateResponse("Benutzerverwaltung.html", {"request": request})
+
 
 # Router registrieren
 app.include_router(auth_routes.router, prefix="/auth", tags=["Auth"])
-app.include_router(user_routes.router, prefix="/users", tags=["Users"])
+app.include_router(user_routes.router, prefix="/user", tags=["Users"])
 app.include_router(sommerlager_routes.router, prefix="/lager", tags=["Sommerlager"])
 app.include_router(group_routes.router, prefix="/groups", tags=["Gruppen"])
 app.include_router(bank_account_routes.router, prefix="/bank", tags=["Banking"])
